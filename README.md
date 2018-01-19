@@ -1,2 +1,46 @@
+
 # asyncio-executor
-协程执行器,起一个额外的线程执行事件循环,主线程则管理这个事件循环线程, 这个执行器不要用在协程中.
+
++ version: 0.0.1
++ status: dev
++ author: hsz
++ email: hsz1273327@gmail.com
+
+## Description
+
+asyncio-executor
+
+
+keywords:asyncio,executor
+
+## Feature
+
++ Feature1
++ Feature2
+
+## Example
+
+```
+
+
+````
+
+## Install
+
+`python -m pip install asyncio-executor`
+
+
+## Documentation
+
+Documentation on github page <https://github.com/Python-Tools/asyncio-executor>
+
+
+
+## TODO
+
++ todo
+
+## Limitations
+
++ limit
+
