@@ -31,6 +31,11 @@ def _loop_mgr(loop: asyncio.AbstractEventLoop):
         loop.run_until_complete(asyncio.gather(*pending))
 
 
+async def func_executor_coroutine(func, loop=None):
+    _loop = loop or asyncio.get_event_loop()
+    return await _loop.run_in_executor(None, func)
+
+
 class AsyncioExecutor(futures.Executor):
     """asyncio执行器,可以执行函数或者协程.
 
@@ -87,11 +92,15 @@ class AsyncioExecutor(futures.Executor):
         else:
             # 如果是其他可执行对象,那么就使用run_in_executor将可执行对象委托给执行器放入事件循环
             # 返回一个`asyncio.Future`对象
-            #func = functools.partial(fn, *args, **kwargs)
+            #
             # return self._loop.run_in_executor(None, func)
             # return self._func_executor.submit(func)
-            raise RuntimeError(
-                "AsyncioExecutor can only run coroutine")
+            #raise RuntimeError(
+            #    "AsyncioExecutor can only run coroutine")
+            func = functools.partial(fn, *args, **kwargs)
+            coro = func_executor_coroutine(func, self._loop)
+            fu = asyncio.run_coroutine_threadsafe(coro, self._loop)
+            return fu
 
     def shutdown(self, wait=True):
         self._loop.stop()
