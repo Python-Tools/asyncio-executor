@@ -76,19 +76,18 @@ class AsyncioExecutor(futures.Executor):
 
         Params:
 
-            fn (Union[callable,coroutinefunction]): - 要执行的函数或者协程函数
+            ``fn (Union[callable,coroutinefunction])``: - 要执行的函数或者协程函数
 
-            *args/**kwargs : - fn的参数
+            ``*args/**kwargs`` : - fn的参数
 
         Return:
 
-            (concurrent.futures.Future) : - 丢进loop后的future对象,因为使用的是
-            `run_coroutine_threadsafe`方法,因此返回的是一个线程安全的
-            `concurrent.futures.Future`对象
+            (concurrent.futures.Future) : - 丢进loop后的future对象,因为使用的是run_coroutine_threadsafe方法,因此返回的是一个线程安全的concurrent.futures.Future对象
 
         Raise:
 
             (RuntimeError) : - 当执行器是已经关闭或者执行器的事件循环不在运行时,会抛出运行时异常表明无法执行该操作
+
         """
         if self._shutdown:
             raise RuntimeError(
@@ -121,9 +120,6 @@ class AsyncioExecutor(futures.Executor):
 
             wait (bool): - 是否等待线程同步
             timeout (int): - wait为True时才有效果,设置join的等待时间
-
-            *args/**kwargs : - fn的参数
-
         """
         self._loop.call_soon_threadsafe(self._loop.stop)
         self._shutdown = True

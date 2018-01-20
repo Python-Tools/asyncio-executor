@@ -1,7 +1,7 @@
 asyncio-executor
 ===============================
 
-* version: 0.0.1
+* version: 0.0.2
 
 * status: dev
 
@@ -38,6 +38,8 @@ Example
 
 
 .. code:: python
+
+
     from concurrent.futures import as_completed
     import aiohttp
     from asyncio_executor import AsyncioExecutor
@@ -63,6 +65,8 @@ Example
 * 使用`map`接口执行协程任务
 
 .. code:: python
+
+
     from concurrent.futures import as_completed
     import aiohttp
     from asyncio_executor import AsyncioExecutor
@@ -81,10 +85,13 @@ Example
 
     print(result)
 
+
 * 使用`submit`接口提交可执行对象任务
 
 
 .. code:: python
+
+
     from concurrent.futures import as_completed
     import requests as rq
     from asyncio_executor import AsyncioExecutor
@@ -104,9 +111,12 @@ Example
             res = future.result()
             print(res)
 
+
 * 使用`map`接口执行可执行对象任务
 
 .. code:: python
+
+
     from concurrent.futures import as_completed
     import requests as rq
     from asyncio_executor import AsyncioExecutor

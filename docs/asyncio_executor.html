@@ -1,0 +1,202 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>asyncio_executor module &#8212; asyncio-executor  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to asyncio-executor’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-asyncio_executor">
+<span id="asyncio-executor-module"></span><h1>asyncio_executor module<a class="headerlink" href="#module-asyncio_executor" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="asyncio_executor.AsyncioExecutor">
+<em class="property">class </em><code class="descclassname">asyncio_executor.</code><code class="descname">AsyncioExecutor</code><span class="sig-paren">(</span><em>*</em>, <em>loop: typing.Union[asyncio.events.AbstractEventLoop</em>, <em>NoneType] = None</em>, <em>func_executor: typing.Union[concurrent.futures._base.Executor</em>, <em>NoneType] = None</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/asyncio_executor.html#AsyncioExecutor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#asyncio_executor.AsyncioExecutor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">concurrent.futures._base.Executor</span></code></p>
+<p>asyncio执行器,可以执行函数或者协程.</p>
+<dl class="attribute">
+<dt id="asyncio_executor.AsyncioExecutor._shutdown">
+<code class="descname">_shutdown</code><a class="headerlink" href="#asyncio_executor.AsyncioExecutor._shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> –</p>
+<ul class="simple">
+<li>执行器是否终止</li>
+</ul>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="asyncio_executor.AsyncioExecutor._loop">
+<code class="descname">_loop</code><a class="headerlink" href="#asyncio_executor.AsyncioExecutor._loop" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>asyncio.AbstractEventLoop</em> –</p>
+<ul class="simple">
+<li>事件循环</li>
+</ul>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="asyncio_executor.AsyncioExecutor._thread">
+<code class="descname">_thread</code><a class="headerlink" href="#asyncio_executor.AsyncioExecutor._thread" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>threading.Thread</em> –</p>
+<ul class="simple">
+<li>执行事件循环上任务的线程</li>
+</ul>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="asyncio_executor.AsyncioExecutor._func_executor">
+<code class="descname">_func_executor</code><a class="headerlink" href="#asyncio_executor.AsyncioExecutor._func_executor" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>futures.Executor</em> –</p>
+<ul class="simple">
+<li>如果使用执行器,那么默认使用什么执行器</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="asyncio_executor.AsyncioExecutor.shutdown">
+<code class="descname">shutdown</code><span class="sig-paren">(</span><em>wait: bool = True</em>, <em>timeout: int = None</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/asyncio_executor.html#AsyncioExecutor.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#asyncio_executor.AsyncioExecutor.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>关闭执行器</p>
+<p>Params:</p>
+<blockquote>
+<div>wait (bool): - 是否等待线程同步
+timeout (int): - wait为True时才有效果,设置join的等待时间</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="asyncio_executor.AsyncioExecutor.submit">
+<code class="descname">submit</code><span class="sig-paren">(</span><em>fn: typing.Any</em>, <em>*args: typing.Any</em>, <em>**kwargs: typing.Any</em><span class="sig-paren">)</span> &#x2192; concurrent.futures._base.Future<a class="reference internal" href="_modules/asyncio_executor.html#AsyncioExecutor.submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#asyncio_executor.AsyncioExecutor.submit" title="Permalink to this definition">¶</a></dt>
+<dd><p>提交任务.会先检查执行器是否已经关闭或者执行器的事件循环是否还在运行,
+如果不是则会抛出一个运行时异常</p>
+<p>Params:</p>
+<blockquote>
+<div><p><code class="docutils literal"><span class="pre">fn</span> <span class="pre">(Union[callable,coroutinefunction])</span></code>: - 要执行的函数或者协程函数</p>
+<p><code class="docutils literal"><span class="pre">*args/**kwargs</span></code> : - fn的参数</p>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li>丢进loop后的future对象,因为使用的是run_coroutine_threadsafe方法,因此返回的是一个线程安全的concurrent.futures.Future对象</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(concurrent.futures.Future)</td>
+</tr>
+</tbody>
+</table>
+<p>Raise:</p>
+<blockquote>
+<div>(RuntimeError) : - 当执行器是已经关闭或者执行器的事件循环不在运行时,会抛出运行时异常表明无法执行该操作</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="asyncio_executor.func_executor_coroutine">
+<code class="descclassname">asyncio_executor.</code><code class="descname">func_executor_coroutine</code><span class="sig-paren">(</span><em>func: typing.Any</em>, <em>loop: typing.Union[asyncio.events.AbstractEventLoop</em>, <em>NoneType] = None</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="reference internal" href="_modules/asyncio_executor.html#func_executor_coroutine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#asyncio_executor.func_executor_coroutine" title="Permalink to this definition">¶</a></dt>
+<dd><p>将函数使用`loop.run_in_executor`包装成协程
+Params:</p>
+<blockquote>
+<div><p>func (callable) : - 需要使用执行器执行的函数</p>
+<p>loop (asyncio.AbstractEventLoop) : - 事件循环</p>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li>执行器的执行结果</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(Any)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to asyncio-executor’s documentation!</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/asyncio_executor.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, hsz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/asyncio_executor.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
