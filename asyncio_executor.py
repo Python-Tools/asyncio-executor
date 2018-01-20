@@ -1,18 +1,14 @@
-"""
-协程执行器,起一个额外的线程执行事件循环,主线程则管理这个事件循环线程,
-这个执行器不要用在协程中.
-
-代码来自于<https://gist.github.com/seglberg/0b4487b57b4fd425c56ad72aba9971be>
-"""
 import asyncio
-from concurrent import futures
 import functools
 import inspect
 import threading
+from concurrent import futures
+from typing import (Union, Callable, Any, Optional)
 
 
-def _loop_mgr(loop: asyncio.AbstractEventLoop):
-    """起一个线程执行事件循环.
+def _loop_mgr(loop: asyncio.AbstractEventLoop)->None:
+    """起一个线程执行事件循环的`run+forever`方法.
+    当它被终止时会清理未完结的协程,但不会关闭事件循环
 
     Params:
     loop (asyncio.AbstractEventLoop) : - 事件循环
@@ -20,18 +16,26 @@ def _loop_mgr(loop: asyncio.AbstractEventLoop):
     if loop.is_closed():
         loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_forever()
-
-    # 只有run_forever被中断才会进入这边收尾
-    # 会收集来已经注册进来的任务然后把它们执行完
-    # If we reach here, the loop was stopped.
-    # We should gather any remaining tasks and finish them.
-    pending = asyncio.Task.all_tasks(loop=loop)
-    if pending:
-        loop.run_until_complete(asyncio.gather(*pending))
+    try:
+        loop.run_forever()
+    finally:
+        loop.run_until_complete(loop.shutdown_asyncgens())
 
 
-async def func_executor_coroutine(func, loop=None):
+async def func_executor_coroutine(
+        func: Any,
+        loop: Optional[asyncio.AbstractEventLoop]=None)->Any:
+    """将函数使用`loop.run_in_executor`包装成协程
+    Params:
+
+        func (callable) : - 需要使用执行器执行的函数
+
+        loop (asyncio.AbstractEventLoop) : - 事件循环
+
+    Return:
+
+        (Any): - 执行器的执行结果
+    """
     _loop = loop or asyncio.get_event_loop()
     return await _loop.run_in_executor(None, func)
 
@@ -40,15 +44,20 @@ class AsyncioExecutor(futures.Executor):
     """asyncio执行器,可以执行函数或者协程.
 
     Attributes:
-    _shutdown (bool): - 执行器是否终止
-    _loop (asyncio.AbstractEventLoop): - 事件循环
-    _thread (threading.Thread): - 执行事件循环上任务的线程
-    _func_executor (futures.Executor): - 如果使用执行器,那么默认使用什么执行器
+
+        _shutdown (bool): - 执行器是否终止
+
+        _loop (asyncio.AbstractEventLoop): - 事件循环
+
+        _thread (threading.Thread): - 执行事件循环上任务的线程
+
+        _func_executor (futures.Executor): - 如果使用执行器,那么默认使用什么执行器
+
     """
 
     def __init__(self, *,
-                 loop: asyncio.AbstractEventLoop=None,
-                 func_executor: futures.Executor=None):
+                 loop: Optional[asyncio.AbstractEventLoop]=None,
+                 func_executor: Optional[futures.Executor]=None)->None:
         super().__init__()
         self._shutdown = False
         self._loop = loop or asyncio.get_event_loop()
@@ -59,17 +68,27 @@ class AsyncioExecutor(futures.Executor):
                                         daemon=True)
         self._thread.start()
 
-    def submit(self, fn, *args, **kwargs):
-        """提交任务.
+    def submit(self,
+               fn: Any,
+               *args: Any, **kwargs: Any)->futures.Future:
+        """提交任务.会先检查执行器是否已经关闭或者执行器的事件循环是否还在运行,
+        如果不是则会抛出一个运行时异常
 
         Params:
 
-        fn (Union[callable,coroutinefunction]): - 要执行的函数或者协程函数
-        *args/**kwargs : - fn的参数
+            fn (Union[callable,coroutinefunction]): - 要执行的函数或者协程函数
+
+            *args/**kwargs : - fn的参数
 
         Return:
 
-        (asyncio.Future) : - 丢进loop后的future对象
+            (concurrent.futures.Future) : - 丢进loop后的future对象,因为使用的是
+            `run_coroutine_threadsafe`方法,因此返回的是一个线程安全的
+            `concurrent.futures.Future`对象
+
+        Raise:
+
+            (RuntimeError) : - 当执行器是已经关闭或者执行器的事件循环不在运行时,会抛出运行时异常表明无法执行该操作
         """
         if self._shutdown:
             raise RuntimeError(
@@ -86,24 +105,27 @@ class AsyncioExecutor(futures.Executor):
             # 因此需要将其包装一下成为`asyncio.Future`对象
             coro = fn(*args, **kwargs)
             fu = asyncio.run_coroutine_threadsafe(coro, self._loop)
-            # return futures.wrap_future(fu,loop=self._loop)
             return fu
 
         else:
             # 如果是其他可执行对象,那么就使用run_in_executor将可执行对象委托给执行器放入事件循环
-            # 返回一个`asyncio.Future`对象
-            #
-            # return self._loop.run_in_executor(None, func)
-            # return self._func_executor.submit(func)
-            #raise RuntimeError(
-            #    "AsyncioExecutor can only run coroutine")
             func = functools.partial(fn, *args, **kwargs)
-            coro = func_executor_coroutine(func, self._loop)
+            coro = func_executor_coroutine(func)
             fu = asyncio.run_coroutine_threadsafe(coro, self._loop)
             return fu
 
-    def shutdown(self, wait=True):
-        self._loop.stop()
+    def shutdown(self, wait: bool=True, timeout: int=None)->None:
+        """关闭执行器
+
+         Params:
+
+            wait (bool): - 是否等待线程同步
+            timeout (int): - wait为True时才有效果,设置join的等待时间
+
+            *args/**kwargs : - fn的参数
+
+        """
+        self._loop.call_soon_threadsafe(self._loop.stop)
         self._shutdown = True
         if wait:
-            self._thread.join()
+            self._thread.join(timeout)

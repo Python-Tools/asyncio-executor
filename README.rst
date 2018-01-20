@@ -1,4 +1,3 @@
-
 asyncio-executor
 ===============================
 
@@ -13,7 +12,7 @@ asyncio-executor
 Desc
 --------------------------------
 
-asyncio-executor
+Asyncio executor for running coroutines. This code is from <https://gist.github.com/seglberg/0b4487b57b4fd425c56ad72aba9971be>
 
 
 keywords:asyncio,executor
@@ -21,14 +20,55 @@ keywords:asyncio,executor
 
 Feature
 ----------------------
-* Feature1
-* Feature2
+* run coroutines asynchronously
 
 Example
 -------------------------------
 
-.. code:: python
+* run coroutines by using `submit`
 
+
+.. code:: python
+    from concurrent.futures import as_completed
+    import aiohttp
+    from asyncio_executor import AsyncioExecutor
+
+    async def httpget(url):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                html = await resp.text("utf-8")
+        return len(html)
+
+    with AsyncioExecutor() as executor:
+        to_do = []
+        urls = ["https://github.com/","https://docs.aiohttp.org/"]
+        for i in urls:
+            job = executor.submit(httpget,i)
+            to_do.append(job)
+
+        for future in as_completed(to_do):
+            res = future.result()
+
+
+
+* run coroutines by using map
+
+.. code:: python
+    from concurrent.futures import as_completed
+    import aiohttp
+    from asyncio_executor import AsyncioExecutor
+
+    async def httpget(url):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                html = await resp.text("utf-8")
+        return len(html)
+
+    with AsyncioExecutor() as executor:
+        result = []
+        urls = ["https://github.com/", "https://docs.aiohttp.org/"]
+        for i in executor.map(httpget, urls):
+            result.append(i)
 
 
 Install
@@ -37,18 +77,8 @@ Install
 - ``python -m pip install asyncio-executor``
 
 
-Documentation
---------------------------------
-
-`Documentation on Readthedocs <https://github.com/Python-Tools/asyncio-executor>`_.
-
-
-
-TODO
------------------------------------
-* todo
 
 Limitations
------------
-* limit
+------------------------------
 
+* only support python 3.5+ 
