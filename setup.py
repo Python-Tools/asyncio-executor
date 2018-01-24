@@ -1,12 +1,12 @@
 from codecs import open
-from setuptools import setup, find_packages
+from setuptools import setup
 from os import path
 
 REQUIREMETS_DEV_FILE = 'requirements_dev.txt'
 REQUIREMETS_TEST_FILE = 'requirements_test.txt'
 REQUIREMETS_FILE = 'requirements.txt'
 PROJECTNAME = 'asyncio-executor'
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 DESCRIPTION = 'asyncio-executor'
 URL = 'https://github.com/Python-Tools/asyncio-executor'
 AUTHOR = 'hsz'
@@ -21,7 +21,7 @@ CLASSIFIERS = [
     'Topic :: Documentation :: Sphinx',
 ]
 KEYWORDS = ["asyncio", "executor"]
-PACKAGES = find_packages(exclude=['contrib', 'docs', 'test'])
+PACKAGES = ['asyncio_executor']
 ZIP_SAFE = False
 
 HERE = path.abspath(path.dirname(__file__))
@@ -49,8 +49,7 @@ setup(
     license=LICENSE,
     classifiers=CLASSIFIERS,
     keywords=KEYWORDS,
-    packages=PACKAGES,
-    include_package_data=True,
+    py_modules=PACKAGES,
     install_requires=REQUIREMETS,
     extras_require={
         'dev': REQUIREMETS_DEV,
