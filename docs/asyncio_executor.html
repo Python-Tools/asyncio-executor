@@ -47,6 +47,7 @@
 <em class="property">class </em><code class="descclassname">asyncio_executor.</code><code class="descname">AsyncioExecutor</code><span class="sig-paren">(</span><em>*</em>, <em>loop: typing.Union[asyncio.events.AbstractEventLoop</em>, <em>NoneType] = None</em>, <em>func_executor: typing.Union[concurrent.futures._base.Executor</em>, <em>NoneType] = None</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/asyncio_executor.html#AsyncioExecutor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#asyncio_executor.AsyncioExecutor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">concurrent.futures._base.Executor</span></code></p>
 <p>asyncio执行器,可以执行函数或者协程.</p>
+<p>[Asyncio executor who can execute the function or coroutine.]</p>
 <dl class="attribute">
 <dt id="asyncio_executor.AsyncioExecutor._shutdown">
 <code class="descname">_shutdown</code><a class="headerlink" href="#asyncio_executor.AsyncioExecutor._shutdown" title="Permalink to this definition">¶</a></dt>
@@ -55,6 +56,11 @@
 <li>执行器是否终止</li>
 </ul>
 </dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">[the executor shutdowned or not]</code></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="asyncio_executor.AsyncioExecutor._loop">
@@ -66,6 +72,11 @@
 </dd></dl>
 
 <dl class="attribute">
+<dt>
+<code class="descname">[the eventloop]</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="asyncio_executor.AsyncioExecutor._thread">
 <code class="descname">_thread</code><a class="headerlink" href="#asyncio_executor.AsyncioExecutor._thread" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>threading.Thread</em> –</p>
@@ -75,41 +86,63 @@
 </dd></dl>
 
 <dl class="attribute">
+<dt>
+<code class="descname">[the thread who runs the tasks in the eventloop]</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="asyncio_executor.AsyncioExecutor._func_executor">
 <code class="descname">_func_executor</code><a class="headerlink" href="#asyncio_executor.AsyncioExecutor._func_executor" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>futures.Executor</em> –</p>
 <ul class="simple">
-<li>如果使用执行器,那么默认使用什么执行器</li>
+<li>如果使用执行器执行函数,那么默认使用什么执行器</li>
 </ul>
 </dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">[which executor will be used by default if must run a function]</code></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="asyncio_executor.AsyncioExecutor.shutdown">
 <code class="descname">shutdown</code><span class="sig-paren">(</span><em>wait: bool = True</em>, <em>timeout: int = None</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/asyncio_executor.html#AsyncioExecutor.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#asyncio_executor.AsyncioExecutor.shutdown" title="Permalink to this definition">¶</a></dt>
 <dd><p>关闭执行器</p>
-<p>Params:</p>
+<p>[Close the executor.]</p>
 <blockquote>
-<div>wait (bool): - 是否等待线程同步
-timeout (int): - wait为True时才有效果,设置join的等待时间</div></blockquote>
+<div><p>Params:</p>
+<blockquote>
+<div><p>wait (bool): - 是否等待线程同步
+[if waitting for syncing the thread or not.]</p>
+<p>timeout (int): - wait为True时才有效果,设置join的等待时间
+[set the waitting time.it will take effect only when param <cite>wait</cite> is <cite>True</cite>.]]</p>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="method">
 <dt id="asyncio_executor.AsyncioExecutor.submit">
 <code class="descname">submit</code><span class="sig-paren">(</span><em>fn: typing.Any</em>, <em>*args: typing.Any</em>, <em>**kwargs: typing.Any</em><span class="sig-paren">)</span> &#x2192; concurrent.futures._base.Future<a class="reference internal" href="_modules/asyncio_executor.html#AsyncioExecutor.submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#asyncio_executor.AsyncioExecutor.submit" title="Permalink to this definition">¶</a></dt>
-<dd><p>提交任务.会先检查执行器是否已经关闭或者执行器的事件循环是否还在运行,
-如果不是则会抛出一个运行时异常</p>
+<dd><p>提交任务.</p>
+<p>[submit a task.]</p>
+<p>会先检查执行器是否已经关闭或者执行器的事件循环是否还在运行. 如果不是则会抛出一个运行时异常
+[It will check if the excutor has already closed or the eventloop is not running.
+If yes, will throw a RuntimeError exception.]</p>
 <p>Params:</p>
 <blockquote>
-<div><p><code class="docutils literal"><span class="pre">fn</span> <span class="pre">(Union[callable,coroutinefunction])</span></code>: - 要执行的函数或者协程函数</p>
-<p><code class="docutils literal"><span class="pre">*args/**kwargs</span></code> : - fn的参数</p>
+<div><p><code class="docutils literal"><span class="pre">fn</span> <span class="pre">(Union[callable,coroutinefunction])</span></code>: - 要执行的函数或者协程函数
+[the function or coroutinefunction who need to execute]</p>
+<p><code class="docutils literal"><span class="pre">*args/**kwargs</span></code> : - fn的参数
+[the function’s params]</p>
 </div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
-<li>丢进loop后的future对象,因为使用的是run_coroutine_threadsafe方法,因此返回的是一个线程安全的concurrent.futures.Future对象</li>
+<li>丢进loop后的future对象,因为使用的是`run_coroutine_threadsafe`方法,因此返回的是一个线程安全的`concurrent.futures.Future`对象.</li>
 </ul>
+<p>[the instance of Future, because of using the method <cite>run_coroutine_threadsafe</cite>,it will return a instance of <cite>concurrent.futures.Future</cite> who is thread safe.]</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(concurrent.futures.Future)</td>
@@ -118,7 +151,8 @@ timeout (int): - wait为True时才有效果,设置join的等待时间</div></blo
 </table>
 <p>Raise:</p>
 <blockquote>
-<div>(RuntimeError) : - 当执行器是已经关闭或者执行器的事件循环不在运行时,会抛出运行时异常表明无法执行该操作</div></blockquote>
+<div>(RuntimeError) : - 当执行器是已经关闭或者执行器的事件循环不在运行时,会抛出运行时异常表明无法执行该操作.
+[when the excutor has already closed or the eventloop is not running.]</div></blockquote>
 </dd></dl>
 
 </dd></dl>
@@ -126,18 +160,19 @@ timeout (int): - wait为True时才有效果,设置join的等待时间</div></blo
 <dl class="function">
 <dt id="asyncio_executor.func_executor_coroutine">
 <code class="descclassname">asyncio_executor.</code><code class="descname">func_executor_coroutine</code><span class="sig-paren">(</span><em>func: typing.Any</em>, <em>loop: typing.Union[asyncio.events.AbstractEventLoop</em>, <em>NoneType] = None</em><span class="sig-paren">)</span> &#x2192; typing.Any<a class="reference internal" href="_modules/asyncio_executor.html#func_executor_coroutine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#asyncio_executor.func_executor_coroutine" title="Permalink to this definition">¶</a></dt>
-<dd><p>将函数使用`loop.run_in_executor`包装成协程
-Params:</p>
+<dd><p>将函数使用`loop.run_in_executor`包装成协程函数.</p>
+<p>[wrap <cite>loop.run_in_executor</cite> as a coroutine function.]</p>
+<p>Params:</p>
 <blockquote>
-<div><p>func (callable) : - 需要使用执行器执行的函数</p>
-<p>loop (asyncio.AbstractEventLoop) : - 事件循环</p>
+<div><p>func (callable) : - 需要使用执行器执行的函数[the function who need the executor to run].</p>
+<p>loop (asyncio.AbstractEventLoop) : - 事件循环[the eventloop]</p>
 </div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
-<li>执行器的执行结果</li>
+<li>执行器的执行结果[the result the func retruned ran in the executor]</li>
 </ul>
 </td>
 </tr>

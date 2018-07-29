@@ -49,11 +49,16 @@
 
 
 <span class="k">def</span> <span class="nf">_loop_mgr</span><span class="p">(</span><span class="n">loop</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">AbstractEventLoop</span><span class="p">)</span><span class="o">-&gt;</span><span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;起一个线程执行事件循环的`run+forever`方法.</span>
+    <span class="sd">&quot;&quot;&quot;起一个线程执行事件循环的`run_forever`方法.</span>
+<span class="sd">    </span>
+<span class="sd">    [Start up a thread for running the eventloop&#39;s `run_forever` method.]</span>
+
 <span class="sd">    当它被终止时会清理未完结的协程,但不会关闭事件循环</span>
+<span class="sd">    [When it shutdown, all the coroutines will be closed.but the eventloop will not close.]</span>
 
 <span class="sd">    Params:</span>
-<span class="sd">    loop (asyncio.AbstractEventLoop) : - 事件循环</span>
+<span class="sd">        loop (asyncio.AbstractEventLoop) : - 事件循环[the eventloop]</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">loop</span><span class="o">.</span><span class="n">is_closed</span><span class="p">():</span>
         <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">new_event_loop</span><span class="p">()</span>
@@ -67,16 +72,19 @@
 <div class="viewcode-block" id="func_executor_coroutine"><a class="viewcode-back" href="../asyncio_executor.html#asyncio_executor.func_executor_coroutine">[docs]</a><span class="k">async</span> <span class="k">def</span> <span class="nf">func_executor_coroutine</span><span class="p">(</span>
         <span class="n">func</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
         <span class="n">loop</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">asyncio</span><span class="o">.</span><span class="n">AbstractEventLoop</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Any</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;将函数使用`loop.run_in_executor`包装成协程</span>
+    <span class="sd">&quot;&quot;&quot;将函数使用`loop.run_in_executor`包装成协程函数.</span>
+
+<span class="sd">    [wrap `loop.run_in_executor` as a coroutine function.]</span>
+
 <span class="sd">    Params:</span>
 
-<span class="sd">        func (callable) : - 需要使用执行器执行的函数</span>
+<span class="sd">        func (callable) : - 需要使用执行器执行的函数[the function who need the executor to run].</span>
 
-<span class="sd">        loop (asyncio.AbstractEventLoop) : - 事件循环</span>
+<span class="sd">        loop (asyncio.AbstractEventLoop) : - 事件循环[the eventloop]</span>
 
 <span class="sd">    Return:</span>
 
-<span class="sd">        (Any): - 执行器的执行结果</span>
+<span class="sd">        (Any): - 执行器的执行结果[the result the func retruned ran in the executor]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_loop</span> <span class="o">=</span> <span class="n">loop</span> <span class="ow">or</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
     <span class="k">return</span> <span class="k">await</span> <span class="n">_loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span></div>
@@ -85,15 +93,21 @@
 <div class="viewcode-block" id="AsyncioExecutor"><a class="viewcode-back" href="../asyncio_executor.html#asyncio_executor.AsyncioExecutor">[docs]</a><span class="k">class</span> <span class="nc">AsyncioExecutor</span><span class="p">(</span><span class="n">futures</span><span class="o">.</span><span class="n">Executor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;asyncio执行器,可以执行函数或者协程.</span>
 
+<span class="sd">    [Asyncio executor who can execute the function or coroutine.]</span>
+
 <span class="sd">    Attributes:</span>
 
 <span class="sd">        _shutdown (bool): - 执行器是否终止</span>
+<span class="sd">        [the executor shutdowned or not]</span>
 
 <span class="sd">        _loop (asyncio.AbstractEventLoop): - 事件循环</span>
+<span class="sd">        [the eventloop]</span>
 
 <span class="sd">        _thread (threading.Thread): - 执行事件循环上任务的线程</span>
+<span class="sd">        [the thread who runs the tasks in the eventloop]</span>
 
-<span class="sd">        _func_executor (futures.Executor): - 如果使用执行器,那么默认使用什么执行器</span>
+<span class="sd">        _func_executor (futures.Executor): - 如果使用执行器执行函数,那么默认使用什么执行器</span>
+<span class="sd">        [which executor will be used by default if must run a function]</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -113,22 +127,31 @@
 <div class="viewcode-block" id="AsyncioExecutor.submit"><a class="viewcode-back" href="../asyncio_executor.html#asyncio_executor.AsyncioExecutor.submit">[docs]</a>    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                <span class="n">fn</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
                <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">futures</span><span class="o">.</span><span class="n">Future</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;提交任务.会先检查执行器是否已经关闭或者执行器的事件循环是否还在运行,</span>
-<span class="sd">        如果不是则会抛出一个运行时异常</span>
+        <span class="sd">&quot;&quot;&quot;提交任务.</span>
+
+<span class="sd">        [submit a task.]</span>
+<span class="sd">        </span>
+<span class="sd">        会先检查执行器是否已经关闭或者执行器的事件循环是否还在运行. 如果不是则会抛出一个运行时异常</span>
+<span class="sd">        [It will check if the excutor has already closed or the eventloop is not running. </span>
+<span class="sd">        If yes, will throw a RuntimeError exception.]</span>
 
 <span class="sd">        Params:</span>
 
 <span class="sd">            ``fn (Union[callable,coroutinefunction])``: - 要执行的函数或者协程函数</span>
+<span class="sd">            [the function or coroutinefunction who need to execute]</span>
 
 <span class="sd">            ``*args/**kwargs`` : - fn的参数</span>
+<span class="sd">            [the function&#39;s params]</span>
 
 <span class="sd">        Return:</span>
 
-<span class="sd">            (concurrent.futures.Future) : - 丢进loop后的future对象,因为使用的是run_coroutine_threadsafe方法,因此返回的是一个线程安全的concurrent.futures.Future对象</span>
+<span class="sd">            (concurrent.futures.Future) : - 丢进loop后的future对象,因为使用的是`run_coroutine_threadsafe`方法,因此返回的是一个线程安全的`concurrent.futures.Future`对象.</span>
+<span class="sd">            [the instance of Future, because of using the method `run_coroutine_threadsafe`,it will return a instance of `concurrent.futures.Future` who is thread safe.]</span>
 
 <span class="sd">        Raise:</span>
 
-<span class="sd">            (RuntimeError) : - 当执行器是已经关闭或者执行器的事件循环不在运行时,会抛出运行时异常表明无法执行该操作</span>
+<span class="sd">            (RuntimeError) : - 当执行器是已经关闭或者执行器的事件循环不在运行时,会抛出运行时异常表明无法执行该操作.</span>
+<span class="sd">            [when the excutor has already closed or the eventloop is not running.]</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shutdown</span><span class="p">:</span>
@@ -158,10 +181,16 @@
 <div class="viewcode-block" id="AsyncioExecutor.shutdown"><a class="viewcode-back" href="../asyncio_executor.html#asyncio_executor.AsyncioExecutor.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;关闭执行器</span>
 
+<span class="sd">        [Close the executor.]</span>
+
 <span class="sd">         Params:</span>
 
 <span class="sd">            wait (bool): - 是否等待线程同步</span>
+<span class="sd">            [if waitting for syncing the thread or not.]</span>
+
 <span class="sd">            timeout (int): - wait为True时才有效果,设置join的等待时间</span>
+<span class="sd">            [set the waitting time.it will take effect only when param `wait` is `True`.]]</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">call_soon_threadsafe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shutdown</span> <span class="o">=</span> <span class="kc">True</span>

@@ -1,0 +1,23 @@
+{
+    "meta": {
+        "project_name": "asyncio_executor",
+        "license": "MIT",
+        "version": "0.0.4",
+        "status": "dev",
+        "url": ""
+    },
+    "author": {
+        "author": "huangsizhe",
+        "author_email": "hsz1273327@gmail.com"
+    },
+    "desc": {
+        "keywords": ["tools"],
+        "description": "simple tools"
+    },
+    "form": {
+        "env": "env",
+        "compiler": "python",
+        "project_form": "script",
+        "template": "simple"
+    }
+}
